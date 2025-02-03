@@ -25,7 +25,7 @@ def lambda_handler(event, context):
         "host": "ecommerce-rds.c7acu8uesr1y.us-east-1.rds.amazonaws.com",
         "port": 3306,
         "database": "ecommerce",
-        "password": ""
+        "password": "CY_t6jXaAMxqD^%3PApX"
     })
 
     product_id = None
@@ -43,11 +43,23 @@ def lambda_handler(event, context):
 
         if not product:
             return {
+                'headers': {
+                    'Content-Type': "application/json",
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS, DELETE, PUT, POST',
+                    'Access-Control-Allow-Headers': 'x-api-key'
+                },
                 'statusCode': 404,
                 'body': json.dumps({"Data": "Produto não encontrado" })
             }
         else:
             return {
+                'headers': {
+                    'Content-Type': "application/json",
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS, DELETE, PUT, POST',
+                    'Access-Control-Allow-Headers': 'x-api-key'
+                },
                 'statusCode': 200,
                 'body': json.dumps(product.to_dict())
             }
@@ -59,11 +71,23 @@ def lambda_handler(event, context):
 
         if not product:
             return {
+                'headers': {
+                    'Content-Type': "application/json",
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS, DELETE, PUT, POST',
+                    'Access-Control-Allow-Headers': 'x-api-key'
+                },
                 'statusCode': 404,
                 'body': json.dumps({"Data": "Produto não encontrado" })
             }
         else:
             return {
+                'headers': {
+                    'Content-Type': "application/json",
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS, DELETE, PUT, POST',
+                    'Access-Control-Allow-Headers': 'x-api-key'
+                },
                 'statusCode': 200,
                 'body': json.dumps(product)
             }   

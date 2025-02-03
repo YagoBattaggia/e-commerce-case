@@ -1,22 +1,26 @@
 class ProductItem:
-    def __init__(self, item_id, color_name, color_hex, price, sale_price, image_file, size_name ,stock_qty):
+    def __init__(self, item_id, color_id, color_name, color_hex, price, sale_price, image_file, size_id, size_name ,stock_qty):
         self.item_id = item_id
+        self.color_id = color_id
         self.color_name = color_name
         self.color_hex = color_hex
         self.price = price
         self.sale_price = sale_price
         self.image_file = image_file
+        self.size_id = size_id
         self.size_name = size_name
         self.stock_qty = stock_qty
 
     def to_dict(self):
         return {
             "item_id": self.item_id,
+            "color_id": self.color_id,
             "color_name": self.color_name,
             "color_hex": self.color_hex,
             "price": self.price,
             "sale_price": self.sale_price,
             "image_file": self.image_file,
+            "size_id": self.size_id,
             "size_name": self.size_name,
             "stock_qty": self.stock_qty
         }

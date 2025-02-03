@@ -151,3 +151,24 @@ resource "aws_lambda_function" "lambda_ecommerceDeleteProducts" {
     Product = "ecommerce"
   }
 }
+resource "aws_lambda_function" "lambda_ecommercePutProducts" {
+
+  function_name = "ecommercePutProducts"
+  role          = aws_iam_role.iam_for_lambda.arn
+  description   = "Lamdba to delete a product"
+  handler       = "ecommercePutProducts.lambda_handler"
+  runtime       = "python3.12"
+
+  source_code_hash = data.archive_file.lambda.output_base64sha256
+
+  filename      = "lambda_function_payload.zip"
+
+   vpc_config {
+    subnet_ids         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+    security_group_ids = [aws_security_group.lambdas_sg.id]
+  }
+
+  tags = {
+    Product = "ecommerce"
+  }
+}

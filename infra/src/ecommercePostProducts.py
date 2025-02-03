@@ -26,7 +26,7 @@ def lambda_handler(event, context):
         "host": "ecommerce-rds.c7acu8uesr1y.us-east-1.rds.amazonaws.com",
         "port": 3306,
         "database": "ecommerce",
-        "password": ""
+        "password": "CY_t6jXaAMxqD^%3PApX"
     })
 
     isProductInDb = productRepo.AddProduct(productPayload)
@@ -34,11 +34,23 @@ def lambda_handler(event, context):
 
     if(isProductInDb):
         return {
+            'headers': {
+                'Content-Type': "application/json",
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS, DELETE, PUT, POST',
+                'Access-Control-Allow-Headers': 'x-api-key'
+            },
             'statusCode': 201,
             'body': json.dumps({"Data": "Produto inserido com sucesso" })
         }
     else:
         return {
+            'headers': {
+                'Content-Type': "application/json",
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS, DELETE, PUT, POST',
+                'Access-Control-Allow-Headers': 'x-api-key'
+            },
             'statusCode': 500,
             'body': json.dumps({"Data": "Erro ao inserir produto" })
         }

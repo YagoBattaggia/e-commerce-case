@@ -24,21 +24,23 @@ class ProductRepository:
         )  
         
         # Obtendo variantes do produto
-        product_variants = config.queryRDS( f"SELECT product_id, product_item_id, color_name, color_hex, price, sale_price, image_file, size_name, stock_qty  FROM view_product_item2 WHERE product_id = {product_id}" )
+        product_variants = config.queryRDS( f"SELECT product_id, product_item_id, color_id, color_name, color_hex, price, sale_price, image_file, size_id, size_name, stock_qty  FROM view_product_item2 WHERE product_id = {product_id}" )
 
         print(product_variants)
 
         for variant in product_variants:
             print(variant)
             product.addVariant(ProductItem(
-            item_id=variant["product_item_id"],
-            color_name=variant["color_name"],
-            color_hex=variant["color_hex"],
-            price=variant["price"],
-            sale_price=variant["sale_price"],
-            image_file=variant["image_file"],
-            size_name=variant["size_name"],
-            stock_qty=variant["stock_qty"]
+                item_id=variant["product_item_id"],
+                color_id=variant["color_id"],
+                color_name=variant["color_name"],
+                color_hex=variant["color_hex"],
+                price=variant["price"],
+                sale_price=variant["sale_price"],
+                image_file=variant["image_file"],
+                size_id=variant["size_id"],
+                size_name=variant["size_name"],
+                stock_qty=variant["stock_qty"]
         ))
         
         return product
@@ -66,7 +68,7 @@ class ProductRepository:
         print(products)
 
         # Obtendo variantes do produto
-        product_variants = config.queryRDS( f"SELECT product_id, product_item_id, color_name, color_hex, price, sale_price, image_file, size_name, stock_qty  FROM view_product_item2" )
+        product_variants = config.queryRDS( f"SELECT product_id, product_item_id, color_id, color_name, color_hex, price, sale_price, image_file, size_id,size_name, stock_qty  FROM view_product_item2" )
 
         print(product_variants)
 
@@ -75,11 +77,13 @@ class ProductRepository:
             if(productId in products):
                 products[productId].addVariant(ProductItem(
                     item_id=variant["product_item_id"],
+                    color_id=variant["color_id"],
                     color_name=variant["color_name"],
                     color_hex=variant["color_hex"],
                     price=variant["price"],
                     sale_price=variant["sale_price"],
                     image_file=variant["image_file"],
+                    size_id=variant["size_id"],
                     size_name=variant["size_name"],
                     stock_qty=variant["stock_qty"]
                     )
@@ -125,9 +129,7 @@ class ProductRepository:
         for variant in productPayload.get('variants'):
 
             # Inserindo cor
-            colorQuery = MySQLQuery.into(Table('product_color')).columns("color_name", "color_hex").insert(
-                Parameter('%s'),
-                Parameter('%s'))
+            colorQuery = MySQLQuery.into(Table('product_color')).columns("color_name", "color_hex").insert(Parameter('%s'), Parameter('%s'))
             params = (
                 variant.get('color_name'),
                 variant.get('color_hex'),
@@ -137,9 +139,7 @@ class ProductRepository:
 
 
             # Inserindo Tamanho
-            colorQuery = MySQLQuery.into(Table('product_size')).columns("stock_qty", "size_name").insert(
-                Parameter('%s'),
-                Parameter('%s'))
+            colorQuery = MySQLQuery.into(Table('product_size')).columns("stock_qty", "size_name").insert(Parameter('%s'), Parameter('%s'))
             params = (
                 variant.get('stock_qty'),
                 variant.get('size_name'),
@@ -167,6 +167,99 @@ class ProductRepository:
 
         return True
 
+    def updateProduct(self, productPayload):
+        # Obtendo Categoria
+        category = Table('category')
+        categoryIdQuery = MySQLQuery.from_(category).select('category_id').where(
+            (category.category_name == productPayload.get('category_name')) &
+            (category.category_description == productPayload.get('category_description'))
+        )
+        
+        categoryId = int(config.queryRDS(str(categoryIdQuery))[0]['category_id'])
+
+        if not categoryId:
+            raise ValueError("Categoria não encontrada!")
+
+        # Atualizando Produto
+        productTable = Table('product')
+
+        productQuery = MySQLQuery.update(productTable).set(
+            productTable.product_name, Parameter('%s')
+        ).set(
+            productTable.product_description, Parameter('%s')
+        ).set(
+            productTable.product_category_id, Parameter('%s')
+        ).where(
+            productTable.product_id == Parameter('%s')
+        )
+
+        params = (
+            productPayload.get('product_name'),
+            productPayload.get('product_description'),
+            categoryId,
+            productPayload.get('product_id')
+        )
+        config.queryRDS(str(productQuery), params)
+
+        for variant in productPayload.get('variants'):
+            
+            # Atualizando cor
+            colorTable = Table('product_color')
+            colorQuery = MySQLQuery.update(colorTable).set(
+                'color_name', Parameter('%s')
+            ).set(
+                'color_hex', Parameter('%s')
+            ).where(
+                colorTable.color_id == Parameter('%s')
+            )
+            params = (
+                variant.get('color_name'),
+                variant.get('color_hex'),
+                variant.get('color_id')
+            )
+            config.queryRDS(str(colorQuery), params)
+
+            # Atualizando Tamanho
+            sizeTable = Table('product_size')
+            sizeQuery = MySQLQuery.update(sizeTable).set(
+                'stock_qty', Parameter('%s')
+            ).set(
+                'size_name', Parameter('%s')
+            ).where(
+                sizeTable.size_id == Parameter('%s')
+            )
+            params = (
+                variant.get('stock_qty'),
+                variant.get('size_name'),
+                variant.get('size_id')
+            )
+            config.queryRDS(str(sizeQuery), params)
+
+            # Atualizando Item Variante
+            itemQuery = MySQLQuery.update(Table('product_item')).set(
+                'price', Parameter('%s')
+            ).set(
+                'sale_price', Parameter('%s')
+            ).set(
+                'product_color_id', Parameter('%s')
+            ).set(
+                'size_id', Parameter('%s')
+            ).where(
+                'product_item_id' == Parameter('%s')
+            )
+            params = (
+                variant.get('price'),
+                variant.get('sale_price'),
+                variant.get('color_id'),
+                variant.get('size_id'),
+                variant.get('item_id')
+            )
+            config.queryRDS(str(itemQuery), params)
+
+        config.commitConnection()
+
+        return True
+    
     def deleteProduct(self, productPayload):
         
         config.beginConnection()

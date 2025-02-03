@@ -2,23 +2,24 @@ import json
 import logging
 import signal
 
+
 from utils import config
 
 from shared.Models.product_model import Product
 from shared.Repo.product_repo import ProductRepository
 productRepo = ProductRepository()
 
+logger = logging.getLogger(__name__)
+logger.setLevel("DEBUG")
+
 def exit_gracefully(signum, frame):
     config.closeConnection()
 
 signal.signal(signal.SIGTERM, exit_gracefully)
 
-logger = logging.getLogger(__name__)
-logger.setLevel("DEBUG")
-
 def lambda_handler(event, context):
     # TODO implement
-    # logger.debug(config.getSecretValue('rds-password'))
+    # logger.info(config.getSecretValue('rds-password'))
     productPayload = json.loads(event.get('body'))
     data = config.getConnection({
         "user": "admin",
@@ -28,18 +29,19 @@ def lambda_handler(event, context):
         "password": "CY_t6jXaAMxqD^%3PApX"
     })
 
-    isProductRemoved = productRepo.deleteProduct(productPayload)
+    isProductInDb = productRepo.updateProduct(productPayload)
     config.closeConnection()
-    if(isProductRemoved):
+
+    if(isProductInDb):
         return {
             'headers': {
                 'Content-Type': "application/json",
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, OPTIONS, DELETE, PUT, POST',
-                'Access-Control-Allow-Headers': 'x-api-key'
+                'Access-Control-Allow-Headers': 'x-api-key',
             },
-            'statusCode': 204,
-            'body': json.dumps({"Data": "Produto removido com sucesso" })
+            'statusCode': 200,
+            'body': json.dumps({"Data": "Produto atualizado com sucesso" })
         }
     else:
         return {
@@ -47,8 +49,9 @@ def lambda_handler(event, context):
                 'Content-Type': "application/json",
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, OPTIONS, DELETE, PUT, POST',
-                'Access-Control-Allow-Headers': 'x-api-key'
+                'Access-Control-Allow-Headers': 'x-api-key',
             },
             'statusCode': 500,
-            'body': json.dumps({"Data": "Erro ao remover produto" })
+            'body': json.dumps({"Data": "Erro ao atualizar produto" })
         }
+
