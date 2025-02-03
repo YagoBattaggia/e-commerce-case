@@ -20,11 +20,7 @@ AWS.
 ## Protótipo
 A primeira etapa para o desenvolvimento do projeto é idealizar o protótipo, onde a jornada usuário deverá ser planejada considerando as melhores práticas de interfaces.
 
-Imagem dos wireframes -->
-
 Com a jornada do usuário definida, a próxima etapa é a integração com a identidade visual. Nesta etapa, a interface ganha vida com cores, imagens, botões e textos.
-
-Imagem do protótipo -->
 
 
 
