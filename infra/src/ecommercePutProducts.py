@@ -26,7 +26,7 @@ def lambda_handler(event, context):
         "host": "ecommerce-rds.c7acu8uesr1y.us-east-1.rds.amazonaws.com",
         "port": 3306,
         "database": "ecommerce",
-        "password": "CY_t6jXaAMxqD^%3PApX"
+        "password": ""
     })
 
     isProductInDb = productRepo.updateProduct(productPayload)
